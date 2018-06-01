@@ -7,6 +7,7 @@
  * the pandoc AST serialized JSON
  * 
  * Ported from https://github.com/jgm/pandocfilters/blob/master/pandocfilters.py
+ * and fixed to work with recent JSON outputs.
  */
 class Pandoc_Filter
 {
@@ -28,7 +29,7 @@ class Pandoc_Filter
             $array = array();
             foreach ($x as $item) {
                 if (is_object($item) && isset($item->t)) {
-                    $res = $action($item->t, $item->c, $format, $meta);
+                    $res = $action($item->t, property_exists($item,'c') ? $item->c : null, $format, $meta);
                     if (is_null($res)) {
                         $array[] = self::walk($item, $action, $format, $meta);
                     } elseif (is_array($res)) {
@@ -82,14 +83,16 @@ class Pandoc_Filter
     {
         if (! $source) $source = self::$source;
         $doc = json_decode(file_get_contents($source));
+
         if (count($GLOBALS['argv']) > 1) {
             $format = $GLOBALS['argv'][1];
         } else {
             $format = '';
         }
-        $altered = self::walk($doc, $action, $format, $doc[0]->unMeta);
-        $json = json_encode($altered, JSON_HEX_TAG|JSON_HEX_AMP|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
-        
+
+        $doc->blocks = self::walk($doc->blocks, $action, $format, $doc->meta);
+        $json = json_encode($doc, JSON_HEX_TAG|JSON_HEX_AMP|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+
         echo $json . PHP_EOL;
     }
 
