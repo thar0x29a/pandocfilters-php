@@ -1,3 +1,8 @@
+
+# Note!!
+This ist just a fork. I fixed the issues with the original quick and dirty and will not give any maintainance or support for it. Maybe I shall write my own version this days.
+
+
 # PHP pandocfilters
 
 This is a PHP port of the python module for writing pandoc filters found at
